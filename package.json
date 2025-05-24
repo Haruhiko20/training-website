@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node dist/src/server.js",
     "build": "npm run lint && npm run format && tsc",
-    "test": "mocha -r ts-node/register \"tests/**/*.ts\" --timeout 600000 --exit",
+    "test": "mocha -r ts-node/register \"tests/**/*.ts\" --timeout 10000 --exit",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\""
