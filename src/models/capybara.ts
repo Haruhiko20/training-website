@@ -1,18 +1,19 @@
 import { Schema, model } from 'mongoose';
 
-// Інтерфейс для об'єкта "Заєць"
-interface IRabbit {
-    name: string; // Ім'я зайця
-    age: number; // Вік зайця у роках
-    height: number; // Висота зайця в сантиметрах
-    weight: number; // Вага зайця в кілограмах
-    gender: 'male' | 'female'; // Стать зайця: 'male' - самець, 'female' - самка
-    description?: string; // Опис зайця (необов'язкове поле)
+// Інтерфейс для об'єкта "Капібара"
+interface ICapybara {
+    name: string; // Ім'я капібари
+    age: number; // Вік капібари у роках
+    height: number; // Висота капібари в сантиметрах
+    weight: number; // Вага капібари в кілограмах
+    gender: 'male' | 'female'; // Стать капібари: 'male' - самець, 'female' - самка
+    description?: string; // Опис капібари (необов'язкове поле)
+    activityTime: string; // Час активності, наприклад '06:00–09:00; 18:00–21:00'
     dateAdded: Date; // Дата додавання запису до бази даних
 }
 
-// Схема MongoDB для моделі "Заєць"
-const rabbitSchema = new Schema<IRabbit>({
+// Схема MongoDB для моделі "Капібара"
+const capybaraSchema = new Schema<ICapybara>({
     name: {
         type: String,
         required: true, // Поле є обов'язковим
@@ -39,8 +40,12 @@ const rabbitSchema = new Schema<IRabbit>({
         type: Date,
         default: Date.now, // Значення за замовчуванням - поточна дата і час
     },
+    activityTime: {
+        type: String,
+        required: true, // Поле є обов'язковим
+    },
 });
 
 // Створення моделі Mongoose на основі схеми
-export const Rabbit = model<IRabbit>('Rabbit', rabbitSchema);
-export type { IRabbit }; // Експортуємо інтерфейс для використання в інших файлах
+export const Capybara = model<ICapybara>('Capybara', capybaraSchema);
+export type { ICapybara }; // Експортуємо інтерфейс для використання в інших файлах

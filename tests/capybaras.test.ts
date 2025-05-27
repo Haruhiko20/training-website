@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import app from '../src/server';
-import { Rabbit } from '../src/models/rabbit';
+import { Capybara } from '../src/models/capybara';
 import { container } from '../src/config/container';
 import { TYPES } from '../src/types/types';
 import { IDatabase } from '../src/interfaces/IDatabase';
@@ -12,12 +12,12 @@ import mongoose from 'mongoose';
 const { expect } = chai;
 chai.use(chaiHttp);
 
-// Тести API вебдодатку сайту про зайців
-describe('API вебдодатку сайту про зайців', () => {
+// Тести API вебдодатку сайту про капібар
+describe('API вебдодатку сайту про капібар', () => {
     // Отримуємо екземпляр бази даних з контейнера
     const database = container.get<IDatabase>(TYPES.IDatabase);
     // Створюємо спеціальний URI для тестової бази даних
-    const testMongoURI = MONGODB_URI.replace(/\/[^/]*$/, '/rabbits-test');
+    const testMongoURI = MONGODB_URI.replace(/\/[^/]*$/, '/capybaras-test');
 
     // Перед запуском тестів підключаємось до тестової бази даних
     before(async () => {
@@ -30,7 +30,7 @@ describe('API вебдодатку сайту про зайців', () => {
         try {
             // Видаляємо тестову базу даних
             await mongoose.connection.db.dropDatabase();
-            console.log('Тестову базу даних "rabbits-test" успішно видалено');
+            console.log('Тестову базу даних "capybaras-test" успішно видалено');
         } catch (error) {
             // Обробляємо можливі помилки
             console.log(
@@ -53,121 +53,128 @@ describe('API вебдодатку сайту про зайців', () => {
         });
     });
 
-    // Перед кожним тестом очищуємо колекцію зайців
+    // Перед кожним тестом очищуємо колекцію капібар
     beforeEach(async () => {
-        await Rabbit.deleteMany({});
+        await Capybara.deleteMany({});
     });
 
-    // Тести для створення запису про нового зайця (POST-запит)
-    describe('POST /api/rabbits', () => {
-        it('має створити запис про нового зайця', done => {
-            // Тестові дані зайця
-            const rabbit = {
+    // Тести для створення запису про нового капібару (POST-запит)
+    describe('POST /api/capybaras', () => {
+        it('має створити запис про нового капібару', done => {
+            // Тестові дані капібару
+            const capybara = {
                 name: 'Вухань',
                 age: 2,
                 height: 30,
                 weight: 2.5,
                 gender: 'male' as const,
-                description: 'Сірий заєць',
+                description: 'Сірий капібара',
+                activityTime: '06:00–09:00',
             };
 
-            // Виконуємо POST-запит для створення запису про зайця
+            // Виконуємо POST-запит для створення запису про капібару
             chai.request(app)
-                .post('/api/rabbits')
-                .send(rabbit)
+                .post('/api/capybaras')
+                .send(capybara)
                 .end((err, res) => {
                     if (err !== null && err !== undefined) {
                         return done(err);
                     }
                     // Перевіряємо відповідь
                     expect(res).to.have.status(201);
-                    expect(res.body).to.have.property('name', rabbit.name);
-                    expect(res.body).to.have.property('age', rabbit.age);
-                    expect(res.body).to.have.property('height', rabbit.height);
-                    expect(res.body).to.have.property('weight', rabbit.weight);
-                    expect(res.body).to.have.property('gender', rabbit.gender);
-                    expect(res.body).to.have.property('description', rabbit.description);
+                    expect(res.body).to.have.property('name', capybara.name);
+                    expect(res.body).to.have.property('age', capybara.age);
+                    expect(res.body).to.have.property('height', capybara.height);
+                    expect(res.body).to.have.property('weight', capybara.weight);
+                    expect(res.body).to.have.property('gender', capybara.gender);
+                    expect(res.body).to.have.property('description', capybara.description);
                     expect(res.body).to.have.property('dateAdded');
+                    expect(res.body).to.have.property('activityTime', '06:00–09:00');
                     expect(new Date(res.body.dateAdded)).to.be.instanceOf(Date);
                     done();
                 });
         });
     });
 
-    // Тести для отримання всіх записів зайців (GET-запит)
-    describe('GET /api/rabbits', () => {
-        it('має отримати всіх зайців', async () => {
-            // Створюємо тестовий запис зайця
-            const testRabbit = new Rabbit({
+    // Тести для отримання всіх записів капібар (GET-запит)
+    describe('GET /api/capybaras', () => {
+        it('має отримати всіх капібар', async () => {
+            // Створюємо тестовий запис капібару
+            const testCapybara = new Capybara({
                 name: 'Білан',
                 age: 3,
                 height: 35,
                 weight: 3.2,
                 gender: 'male',
-                description: 'Білий заєць',
+                description: 'Білий капібара',
+                activityTime: '06:00–09:00',
             });
-            await testRabbit.save();
+            await testCapybara.save();
 
-            // Виконуємо GET-запит для отримання всіх записів зайців
-            const res = await chai.request(app).get('/api/rabbits');
+            // Виконуємо GET-запит для отримання всіх записів капібар
+            const res = await chai.request(app).get('/api/capybaras');
             expect(res).to.have.status(200);
             expect(res.body).to.be.an('array');
             expect(res.body.length).to.equal(1);
             expect(res.body[0]).to.have.property('name', 'Білан');
             expect(res.body[0]).to.have.property('gender', 'male');
-            expect(res.body[0]).to.have.property('description', 'Білий заєць');
+            expect(res.body[0]).to.have.property('description', 'Білий капібара');
             expect(res.body[0]).to.have.property('dateAdded');
+            expect(res.body[0]).to.have.property('activityTime', '06:00–09:00');
             expect(new Date(res.body[0].dateAdded)).to.be.instanceOf(Date);
         });
     });
 
-    // Тести для отримання запису конкретного зайця за ID (GET-запит)
-    describe('GET /api/rabbits/:id', () => {
-        it('має отримати конкретного зайця за id', async () => {
-            // Створюємо запис тестового зайця
-            const testRabbit = new Rabbit({
+    // Тести для отримання запису конкретного капібару за ID (GET-запит)
+    describe('GET /api/capybaras/:id', () => {
+        it('має отримати конкретного капібару за id', async () => {
+            // Створюємо запис тестового капібару
+            const testCapybara = new Capybara({
                 name: 'Косий',
                 age: 1,
                 height: 25,
                 weight: 1.8,
                 gender: 'male',
-                description: 'Коричневий заєць',
+                description: 'Коричневий капібара',
+                activityTime: '06:00–09:00',
             });
-            const savedRabbit = await testRabbit.save();
+            const savedCapybara = await testCapybara.save();
 
-            // Виконуємо GET-запит для отримання запису зайця за ID
-            const res = await chai.request(app).get(`/api/rabbits/${String(savedRabbit._id)}`);
+            // Виконуємо GET-запит для отримання запису капібару за ID
+            const res = await chai.request(app).get(`/api/capybaras/${String(savedCapybara._id)}`);
             expect(res).to.have.status(200);
             expect(res.body).to.have.property('name', 'Косий');
             expect(res.body).to.have.property('age', 1);
             expect(res.body).to.have.property('height', 25);
             expect(res.body).to.have.property('weight', 1.8);
             expect(res.body).to.have.property('gender', 'male');
-            expect(res.body).to.have.property('description', 'Коричневий заєць');
+            expect(res.body).to.have.property('description', 'Коричневий капібара');
+            expect(res.body).to.have.property('activityTime', '06:00–09:00');
         });
 
-        it('має повернути 404 для неіснуючого зайця', async () => {
-            // Виконуємо GET-запит для неіснуючого ID зайця
-            const res = await chai.request(app).get('/api/rabbits/654321654321654321654321');
+        it('має повернути 404 для неіснуючого капібару', async () => {
+            // Виконуємо GET-запит для неіснуючого ID капібару
+            const res = await chai.request(app).get('/api/capybaras/654321654321654321654321');
             expect(res).to.have.status(404);
         });
     });
 
-    // Тести для повного оновлення запису про зайця (PUT-запит)
-    describe('PUT /api/rabbits/:id', () => {
-        it('має повністю оновити запис про зайця', async () => {
-            // Створюємо тестового зайця
-            const testRabbit = new Rabbit({
+    // Тести для повного оновлення запису про капібару (PUT-запит)
+    describe('PUT /api/capybaras/:id', () => {
+        it('має повністю оновити запис про капібару', async () => {
+            // Створюємо тестового капібару
+            const testCapybara = new Capybara({
                 name: 'Оригінальний',
                 age: 1,
                 height: 25,
                 weight: 1.8,
                 gender: 'male',
                 description: 'Початковий опис',
+                activityTime: '06:00–09:00',
             });
-            const savedRabbit = await testRabbit.save();
+            const savedCapybara = await testCapybara.save();
 
-            // Дані для оновлення зайця
+            // Дані для оновлення капібару
             const updatedData = {
                 name: 'Оновлений',
                 age: 2,
@@ -175,12 +182,13 @@ describe('API вебдодатку сайту про зайців', () => {
                 weight: 2.5,
                 gender: 'female',
                 description: 'Оновлений опис',
+                activityTime: '18:00–21:00',
             };
 
-            // Виконуємо PUT-запит для повного оновлення запису про зайця
+            // Виконуємо PUT-запит для повного оновлення запису про капібару
             const res = await chai
                 .request(app)
-                .put(`/api/rabbits/${String(savedRabbit._id)}`)
+                .put(`/api/capybaras/${String(savedCapybara._id)}`)
                 .send(updatedData);
 
             // Перевіряємо результат
@@ -192,20 +200,22 @@ describe('API вебдодатку сайту про зайців', () => {
             expect(res.body).to.have.property('gender', 'female');
             expect(res.body).to.have.property('description', 'Оновлений опис');
             expect(res.body).to.have.property('dateAdded');
+            expect(res.body).to.have.property('activityTime', '18:00–21:00');
             expect(new Date(res.body.dateAdded)).to.be.instanceOf(Date);
         });
 
         it("має завершитися невдачею при відсутності обов'язкових полів", async () => {
-            // Створюємо тестового зайця
-            const testRabbit = new Rabbit({
+            // Створюємо тестового капібару
+            const testCapybara = new Capybara({
                 name: 'Оригінальний',
                 age: 1,
                 height: 25,
                 weight: 1.8,
                 gender: 'male',
                 description: 'Початковий опис',
+                activityTime: '06:00–09:00',
             });
-            const savedRabbit = await testRabbit.save();
+            const savedCapybara = await testCapybara.save();
 
             // Неповні дані для оновлення (відсутні обов'язкові поля)
             const incompleteData = {
@@ -214,50 +224,54 @@ describe('API вебдодатку сайту про зайців', () => {
                 // height і weight відсутні
                 gender: 'female',
                 description: 'Оновлений опис',
+                activityTime: '06:00–09:00',
             };
 
             // Виконуємо PUT-запит з неповними даними
             const res = await chai
                 .request(app)
-                .put(`/api/rabbits/${String(savedRabbit._id)}`)
+                .put(`/api/capybaras/${String(savedCapybara._id)}`)
                 .send(incompleteData);
 
             // Перевіряємо, що запит завершився з помилкою
             expect(res).to.have.status(400);
 
-            // Перевіряємо, що заєць не змінився
-            const unchangedRabbit = await Rabbit.findById(savedRabbit._id);
-            expect(unchangedRabbit).to.have.property('name', 'Оригінальний');
-            expect(unchangedRabbit).to.have.property('height', 25);
-            expect(unchangedRabbit).to.have.property('weight', 1.8);
+            // Перевіряємо, що капібара не змінився
+            const unchangedCapybara = await Capybara.findById(savedCapybara._id);
+            expect(unchangedCapybara).to.have.property('name', 'Оригінальний');
+            expect(unchangedCapybara).to.have.property('height', 25);
+            expect(unchangedCapybara).to.have.property('weight', 1.8);
+            expect(unchangedCapybara).to.have.property('activityTime', '06:00–09:00');
         });
     });
 
-    // Тести для часткового оновлення запису про зайця (PATCH-запит)
-    describe('PATCH /api/rabbits/:id', () => {
-        it('має частково оновити запис про зайця', async () => {
-            // Створюємо тестового зайця
-            const testRabbit = new Rabbit({
+    // Тести для часткового оновлення запису про капібару (PATCH-запит)
+    describe('PATCH /api/capybaras/:id', () => {
+        it('має частково оновити запис про капібару', async () => {
+            // Створюємо тестового капібару
+            const testCapybara = new Capybara({
                 name: 'Оригінальний',
                 age: 1,
                 height: 25,
                 weight: 1.8,
                 gender: 'male',
                 description: 'Початковий опис',
+                activityTime: '06:00–09:00',
             });
-            const savedRabbit = await testRabbit.save();
+            const savedCapybara = await testCapybara.save();
 
             // Дані для часткового оновлення
             const patchData = {
                 name: 'Частково оновлений',
                 age: 3,
                 description: 'Оновлений опис',
+                activityTime: '18:00–21:00',
             };
 
             // Виконуємо PATCH-запит
             const res = await chai
                 .request(app)
-                .patch(`/api/rabbits/${String(savedRabbit._id)}`)
+                .patch(`/api/capybaras/${String(savedCapybara._id)}`)
                 .send(patchData);
 
             // Перевіряємо результат
@@ -269,20 +283,22 @@ describe('API вебдодатку сайту про зайців', () => {
             expect(res.body).to.have.property('gender', 'male');
             expect(res.body).to.have.property('description', 'Оновлений опис');
             expect(res.body).to.have.property('dateAdded');
+            expect(res.body).to.have.property('activityTime', '18:00–21:00');
             expect(new Date(res.body.dateAdded)).to.be.instanceOf(Date);
         });
 
         it('демонструє різницю між PATCH і PUT з частковими оновленнями', async () => {
-            // Створюємо тестового зайця
-            const testRabbit = new Rabbit({
+            // Створюємо тестового капібару
+            const testCapybara = new Capybara({
                 name: 'Оригінальний',
                 age: 1,
                 height: 25,
                 weight: 1.8,
                 gender: 'male',
                 description: 'Початковий опис',
+                activityTime: '06:00–09:00',
             });
-            const savedRabbit = await testRabbit.save();
+            const savedCapybara = await testCapybara.save();
 
             // Ті самі неповні дані, що не спрацювали з PUT, мають працювати з PATCH
             const partialData = {
@@ -291,18 +307,20 @@ describe('API вебдодатку сайту про зайців', () => {
                 // height і weight навмисно відсутні
                 gender: 'female',
                 description: 'Оновлений опис',
+                activityTime: '18:00–21:00',
             };
 
             // Виконуємо PATCH-запит
             const res = await chai
                 .request(app)
-                .patch(`/api/rabbits/${String(savedRabbit._id)}`)
+                .patch(`/api/capybaras/${String(savedCapybara._id)}`)
                 .send(partialData);
 
             // Перевіряємо результат
             expect(res).to.have.status(200);
             expect(res.body).to.have.property('name', 'Оновлений');
             expect(res.body).to.have.property('age', 2);
+            expect(res.body).to.have.property('activityTime', '18:00–21:00');
             // Ці поля мають зберегти свої початкові значення
             expect(res.body).to.have.property('height', 25);
             expect(res.body).to.have.property('weight', 1.8);
@@ -312,12 +330,12 @@ describe('API вебдодатку сайту про зайців', () => {
     });
 
     // Тести для отримання метаданих (HEAD-запит)
-    describe('HEAD /api/rabbits', () => {
+    describe('HEAD /api/capybaras', () => {
         it('має повернути заголовки метаданих', async () => {
             // Виконуємо HEAD-запит
             const res = await chai
                 .request(app)
-                .head('/api/rabbits')
+                .head('/api/capybaras')
                 .set('Accept', 'application/json');
 
             // Перевіряємо статус відповіді
@@ -337,28 +355,32 @@ describe('API вебдодатку сайту про зайців', () => {
         });
     });
 
-    // Тести для видалення запису зайця (DELETE-запит)
-    describe('DELETE /api/rabbits/:id', () => {
-        it('має видалити запис про зайця', async () => {
-            // Створюємо тестового зайця
-            const testRabbit = new Rabbit({
+    // Тести для видалення запису капібару (DELETE-запит)
+    describe('DELETE /api/capybaras/:id', () => {
+        it('має видалити запис про капібару', async () => {
+            // Створюємо тестового капібару
+            const testCapybara = new Capybara({
                 name: 'Стрибунець',
                 age: 2,
                 height: 28,
                 weight: 2.1,
                 gender: 'female',
-                description: 'Чорний заєць',
+                description: 'Чорний капібара',
+                activityTime: '06:00–09:00',
             });
-            const savedRabbit = await testRabbit.save();
+            const savedCapybara = await testCapybara.save();
 
             // Виконуємо DELETE-запит
-            const res = await chai.request(app).delete(`/api/rabbits/${String(savedRabbit._id)}`);
+            // eslint-disable-next-line prettier/prettier
+            const res = await chai
+                .request(app)
+                .delete(`/api/capybaras/${String(savedCapybara._id)}`);
             expect(res).to.have.status(200);
-            expect(res.body).to.have.property('message', 'Запис про зайця видалено');
+            expect(res.body).to.have.property('message', 'Запис про капібару видалено');
 
-            // Перевіряємо, що запис про зайця дійсно видалено з бази
-            const findRabbit = await Rabbit.findById(savedRabbit._id);
-            expect(findRabbit).to.be.null;
+            // Перевіряємо, що запис про капібару дійсно видалено з бази
+            const findCapybara = await Capybara.findById(savedCapybara._id);
+            expect(findCapybara).to.be.null;
         });
     });
 });
